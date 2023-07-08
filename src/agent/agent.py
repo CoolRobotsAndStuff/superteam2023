@@ -54,7 +54,7 @@ class Agent(AgentInterface):
 
         self.__stage_machine = StateMachine("explore", self.__set_force_calculation)
         self.__stage_machine.create_state(name="explore", function=self.__stage_explore, possible_changes={"return_to_start"})
-        self.__stage_machine.create_state(name="return_to_start", function=self.__stage_return_to_start)
+        self.__stage_machine.create_state(name="return_to_start", function=self.__stage_return_to_start, possible_changes={"explore"})
 
         self.do_force_calculation = False
         self.end_reached_distance_threshold = 0.04
@@ -62,6 +62,8 @@ class Agent(AgentInterface):
 
         self.__path_time_calculator_step_counter = StepCounter(300)
         self.__path_time_calculator = PathTimeCalculator(self.__mapper, 0.06, 0.01)
+
+        self.__do_end = False
 
         self.__target_position = None
 
@@ -72,11 +74,12 @@ class Agent(AgentInterface):
         return self.__target_position
     
     def do_end(self) -> bool:
-        return self.__stage_machine.state == "return_to_start" and \
-               self.__mapper.robot_position.get_distance_to(self.__mapper.start_position) < self.end_reached_distance_threshold
+        return self.__do_end
     
 
     def __stage_explore(self, change_state_function):
+
+        self.__do_end = False
         self.__navigation_agent.update(force_calculation=self.do_force_calculation)
         self.do_force_calculation = False
 
@@ -86,12 +89,10 @@ class Agent(AgentInterface):
         else:
             self.__target_position = self.__navigation_agent.get_target_position()
 
-    def __stage_return_to_start(self, _):
-        self.__return_to_start_agent.update(force_calculation=self.do_force_calculation)
-        self.do_force_calculation = False
+    def __stage_return_to_start(self, change_state_function):
+        self.__do_end = True
+        change_state_function("explore")
 
-        if self.__return_to_start_agent.target_position_exists():
-            self.__target_position = self.__return_to_start_agent.get_target_position()
         
     
     def __set_force_calculation(self):

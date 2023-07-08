@@ -42,7 +42,7 @@ class Executor:
         self.state_machine = StateMachine("init") # Manages states
         self.state_machine.create_state("init", self.state_init, {"explore",}) # This state initializes and calibrates the robot
         self.state_machine.create_state("explore", self.state_explore, {"end", "report_fixture", "send_map", "stuck"}) # This state follows the position returned by the agent
-        self.state_machine.create_state("end", self.state_end)
+        self.state_machine.create_state("end", self.state_end, {"explore"})
         #self.state_machine.create_state("detect_fixtures", self.state_detect_fixtures, {"explore", "report_fixture"})
         self.state_machine.create_state("report_fixture", self.state_report_fixture, {"explore", "send_map"})
         self.state_machine.create_state("send_map", self.state_send_map, {"explore", "end"})
@@ -209,10 +209,9 @@ class Executor:
         
         self.mini_calibrate()
 
-        #self.seq_move_wheels(0, 0)
-        self.seq_move_to_coords(self.agent.get_target_position())
-
-        
+        pos = self.agent.get_target_position()
+        if pos is not None:
+            self.seq_move_to_coords(pos)
       
         self.sequencer.seq_reset_sequence() # Resets the sequence but doesn't change state, so it starts all over again.
 
@@ -223,28 +222,6 @@ class Executor:
         if self.agent.do_end():
             self.state_machine.change_state("end")
 
-        cam_images = self.robot.get_camera_images()
-        if self.victim_reporting_enabled and cam_images is not None and not self.mapper.has_detected_victim_from_position():
-            for cam_image in cam_images:
-                self.robot.lidar.get_detections()
-                fixtures = self.fixture_detector.find_fixtures(cam_image.image)   
-                if len(fixtures):
-                    self.letter_to_report = self.fixture_detector.classify_fixture(fixtures[0])
-                    self.report_orientation = cam_image.data.horizontal_orientation
-
-                    #TODO Sacar en codigo final
-                    if DO_SAVE_FIXTURE_DEBUG:
-                        cv.imwrite(f"{SAVE_FIXTURE_DEBUG_DIR}/{str(time.time()).rjust(50)}-{self.letter_to_report}-{self.robot.position}.png", cam_image.image)
-                    change_state_function("report_fixture")
-                    self.sequencer.reset_sequence() # Resets the sequence
-                    break
-                
-        """
-        if self.stuck_detector.is_stuck():
-            change_state_function("stuck")
-        """
-        
-        
 
     def mini_calibrate(self):
         if self.mini_calibrate_step_counter.check():
@@ -291,9 +268,12 @@ class Executor:
 
 
     def state_end(self, change_state_function):
-        final_matrix = self.final_matrix_creator.pixel_grid_to_final_grid(self.mapper.pixel_grid, self.mapper.start_position)
-        self.robot.comunicator.send_map(final_matrix)
-        self.robot.comunicator.send_end_of_play()
+        self.mapper.reset_walls()
+
+        self.sequencer.reset_sequence()
+        change_state_function("explore")
+
+
 
     def state_send_map(self, change_state_function):
         final_matrix = self.final_matrix_creator.pixel_grid_to_final_grid(self.mapper.pixel_grid, self.mapper.start_position)

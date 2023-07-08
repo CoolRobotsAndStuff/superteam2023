@@ -176,4 +176,11 @@ class Mapper:
         return np.any(self.pixel_grid.arrays["swamps"][min_x:max_x, min_y:max_y])
 
 
+    def reset_walls(self):
+        self.pixel_grid.arrays["walls"][:] = False
+        self.pixel_grid.arrays["detected_points"][:] = 0
+        self.pixel_grid.arrays["traversed"][:] = False
+        self.pixel_grid.arrays["robot_center_traversed"][:] = False
+
+
         
