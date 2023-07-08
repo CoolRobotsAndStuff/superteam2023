@@ -58,7 +58,6 @@ class PositionFinder(PositionFinderInterface):
         #cv.imshow("possible wall targets", possible_targets_array.astype(np.uint8) * 255)
 
         if not np.any(possible_targets_array):
-            print("no tragets")
             self.__target = None
             return
 
