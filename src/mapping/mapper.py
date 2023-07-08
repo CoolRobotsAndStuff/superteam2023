@@ -179,7 +179,7 @@ class Mapper:
     def reset_walls(self):
         self.pixel_grid.arrays["walls"][:] = False
         self.pixel_grid.arrays["detected_points"][:] = 0
-        #self.pixel_grid.arrays["traversed"][:] = False
+        self.pixel_grid.arrays["traversed"][:] = False
         #self.pixel_grid.arrays["robot_center_traversed"][:] = False
 
 
