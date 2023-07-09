@@ -115,18 +115,5 @@
 		"ry": 0.5858,
 		"rz": 0.5858,
 		"a": 2.09
-	},
-	"Distance Sensor 2": {
-		"dictName": "Distance Sensor 2",
-		"name": "Distance Sensor",
-		"customName": "distance sensor2",
-		"type": "",
-		"x": 325,
-		"y": 25,
-		"z": 0,
-		"rx": -0.5858,
-		"ry": 0.5858,
-		"rz": 0.5858,
-		"a": 2.09
 	}
 }
