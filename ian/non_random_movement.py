@@ -31,9 +31,9 @@
         # red_wall = right_tile
 
 # receive_tile_color(self)
-    # if tile_color == blue_wall
+    # if tile_color_received == blue_wall
         # stop random movement, move to the blue wall coordinates
-    # elif tile_color == red_wall
+    # elif tile_color_received == red_wall
         # stop random movement, move to the red wall coordinates
-    # if tile_color == green_wall
+    # if tile_color_received == green_wall
         # stop random movement, move to the green wall coordinates

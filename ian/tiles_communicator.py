@@ -9,22 +9,22 @@ class FloorMapper:
 
 # pseudocode, don't know how to place this (xd)
 
-# tile_color = N
+# tile_color_sent = N
 # if tile_color == blue color filter:
-    # tile_color = B
+    # tile_color_sent = B
 # if tile_color == red color filter:
-    # tile_color = R
+    # tile_color_sent = R
 # if tile_color == green color filter:
-    # tile_color = G
+    # tile_color_sent = G
 
 
 # communicator.py, line 8
 
 class Comunicator(Sensor):
 
-    def send_tile_color(self, tile_color):
+    def send_tile_color(self, tile_color_sent):
         if self.do_get_world_info:
-            message = struct.pack('c', tile_color)
+            message = struct.pack('c', tile_color_sent)
             self.emmiter.send(message)
 
     def receive_tile_color(self):
@@ -32,10 +32,12 @@ class Comunicator(Sensor):
             self.request_game_data()
             if self.receiver.getQueueLength() > 0:
                 received_data = self.receiver.getBytes()
-                tup[1] = tile_color_received
+                tup = struct.unpack('c', received_data)
+                if tup[0].decode("utf-8") in ('R', 'G', 'B') :
+                    tile_color_received = tup [0]
 
 
 # don't know where to put this
 
-if tile_color != N:
-    send_tile_color(self, tile_color)
+if tile_color_sent != N:
+    send_tile_color(self, tile_color_sent)
